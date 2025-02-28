@@ -8,6 +8,16 @@ from telegram.ext import Updater, MessageHandler, Filters
 import configparser
 import logging
 
+from ChatGPT_HKBU import HKBU_ChatGPT
+
+
+def equiped_chatgpt(update, context):
+    global chatgpt
+    reply_message = chatgpt.submit(update.message.text)
+    logging.info("Update: " + str(update))
+    logging.info("context: " + str(context))
+    context.bot.send_message(chat_id=update.effective_chat.id, text=reply_message)
+
 def main():
     # Load your token and create an Updater for your Bot
     config = configparser.ConfigParser()
@@ -21,8 +31,13 @@ def main():
 
     # register a dispatcher to handle message:
     # here we register an echo dispatcher
-    echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
-    dispatcher.add_handler(echo_handler)
+    # echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
+    # dispatcher.add_handler(echo_handler)
+
+    global chatgpt
+    chatgpt = HKBU_ChatGPT(config)
+    chatgpt_handler = MessageHandler(Filters.text & (~Filters.command), equiped_chatgpt)
+    dispatcher.add_handler(chatgpt_handler)
 
     # To start the bot:
     updater.start_polling()
